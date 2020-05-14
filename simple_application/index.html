@@ -1,0 +1,64 @@
+<!DOCTYPE	html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <!--Include	our	JavaScript	library	that	is	in	a	separate	file-->
+    <script	type="text/javascript"	src="myrtclib.js"></script>
+    <!--Include	Google’ s	W ebR TC	JavaScript	adapter-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/7.3.0/adapter.js"></script>
+  </head>
+
+<body>
+  <!--Create	a	div	tag	where	we	will	put	information	regarding	the	connection-->
+  <div	id="status"></div><br>
+  <!--Create	a	div	tag	where	the	received	messages	from	a	remote	peer	will	be	placed-->
+  <div	id="chat"></div>
+
+  <!--Create	a	form	with	an	input	element	and	a	button	to	send	messages	to	the	remote peer-->
+  <!--<form	name="chat_form" onsubmit="onChatSubmit(document.chat_form.msg.value);	return	false;">
+    <input	type="text"	class="search-query"	placeholder="chat	here" name="msg"	id="chat_input">
+    <input	type="submit"	class="btn"	id="chat_submit_btn"/>
+  </form>-->
+  <form name="chat_form" onsubmit="chatSendMessage(document.chat_form.msg.value);  return  false;">
+    <input  type="text" class="search-query"  placeholder="chat here" name="msg"  id="chat_input">
+    <input  type="submit" class="btn" id="chat_submit_btn"/>
+  </form>
+
+  <script>
+    /*Create	a	connection	to	the	signaling	server	and	initialize	the	W ebR TC	stack*/
+    myrtclibinit("ws://localhost:30003");
+
+    /*function	sends	a	message	to	the	remote	peer	using	the	sendDataMessage function*/
+    /*function	onChatSubmit(txt)	{
+      var	msg	=	JSON.stringify({"type"	:	"chatmessage",	"txt"	:	txt});
+      sendDataMessage(msg);
+    };*/
+
+    function chatSendMessage(msg) {
+        if (!channelReady) return;
+        sendMessage({"type" : "CHATMSG", "value" : msg});
+    };
+
+    /*a	callback	function	for	a	catching	event	when	a	new	virtual	room	is created*/
+    function	onRoomReceived(room)	{
+      var	st	=	document.getElementById("status");
+      /*Create	a	link	to	share	with	the	remote	peer ,	put	the	link	in	the	div	status*/
+      st.innerHTML	=	"Now,	if	somebody	wants	to	join	you,	should	use	this link:	<a	href=\""+window.location.href+"?room="+room+"\">"+window.location.href+"?room="+room+"</a>";
+    };
+    
+    /*To	show	the	messages received from the remote peer , we	will declare an	appropriate
+    callback function.	This function gets the message and puts	it in the appropriate place	on the	HTML page*/
+    /*function	onPrivateMessageReceived(txt)	{
+      var	t	=	document.getElementById('chat').innerHTML;
+      t	+=	"<br>"	+	txt;
+      document.getElementById('chat').innerHTML	=	t;
+    }*/
+
+    function onChatMsgReceived(txt) {
+      var chatArea = document.getElementById("chat");
+      chatArea.innerHTML = chatArea.innerHTML + txt;
+      chatArea.scrollTop = chatArea.scrollHeight;
+    };
+  </script>
+</body>
+</html>
